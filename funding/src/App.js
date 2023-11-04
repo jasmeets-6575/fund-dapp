@@ -7,6 +7,9 @@ function App() {
     web3: null,
     contract: null,
   });
+  const [account, setAccount] = useState(null);
+  const [balance, setBalance] = useState(null);
+  const [reload, shouldReload] = useState(false);
 
   useEffect(() => {
     const loadProvider = async () => {
@@ -23,8 +26,22 @@ function App() {
       } else if (!process.env.production) {
         provider = new Web3.provider.HttpProvider("http://localhost:7545");
       }
+
+      setWeb3Api({ web3: new Web3(provider), provider });
     };
-  });
+    loadProvider();
+  }, []);
+
+  const transferFund = async () => {};
+  const withdrawFund = async () => {};
+
+  useEffect(() => {
+    const getAccount = async () => {
+      const account = await web3Api.web3.eth.getAccounts();
+      setAccount(account[0]);
+    };
+    web3Api.web3 && getAccount();
+  }, [web3Api.web3]);
 
   return (
     <>
