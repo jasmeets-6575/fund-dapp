@@ -14,20 +14,49 @@ function App() {
   const [reload, shouldReload] = useState(false);
 
   const reloadEffect = () => shouldReload(!reload);
-
+  const setAccountListener = (provider) => {
+    provider.on("accountsChanged", (accounts) => setAccount(accounts[0]));
+  };
   useEffect(() => {
     const loadProvider = async () => {
       const provider = await detectEthereumProvider();
       const contract = await loadContract("Funder", provider);
       if (provider) {
+        setAccountListener(provider);
         provider.request({ method: "eth_requestAccounts" });
-        setWeb3Api({ web3: new Web3(provider), provider, contract });
+        setWeb3Api({
+          web3: new Web3(provider),
+          provider,
+          contract,
+        });
       } else {
         console.error("Please install MetaMask!", error);
       }
+      // if (window.ethereum) {
+      //   provider = window.ethereum;
+      //   try {
+      //     await provider.enable();
+      //   } catch {
+      //     console.error("User is not allowed");
+      //   }
+      // } else if (window.web3) {
+      //   provider = window.web3.currentProvider;
+      // } else if (!process.env.production) {
+      //   provider = new Web3.providers.HttpProvider("http://localhost:7545");
+      // }
     };
+
     loadProvider();
   }, []);
+
+  useEffect(() => {
+    const loadBalance = async () => {
+      const { contract, web3 } = web3Api;
+      const balance = await web3.eth.getBalance(contract.address);
+      setBalance(web3.utils.fromWei(balance, "ether"));
+    };
+    web3Api.contract && loadBalance();
+  }, [web3Api, reload]);
 
   const transferFund = async () => {
     const { web3, contract } = web3Api;
@@ -49,12 +78,11 @@ function App() {
 
   useEffect(() => {
     const getAccount = async () => {
-      const account = await web3Api.web3.eth.getAccounts();
-      setAccount(account[0]);
+      const accounts = await web3Api.web3.eth.getAccounts();
+      setAccount(accounts[0]);
     };
     web3Api.web3 && getAccount();
   }, [web3Api.web3]);
-
   return (
     <>
       <div className="card text-center">
