@@ -13,6 +13,8 @@ function App() {
   const [balance, setBalance] = useState(null);
   const [reload, shouldReload] = useState(false);
 
+  const reloadEffect = () => shouldReload(!reload);
+
   useEffect(() => {
     const loadProvider = async () => {
       const provider = await detectEthereumProvider();
@@ -27,7 +29,14 @@ function App() {
     loadProvider();
   }, []);
 
-  const transferFund = async () => {};
+  const transferFund = async () => {
+    const { web3, contract } = web3Api;
+    await contract.transfer({
+      from: account,
+      value: web3.utils.toWei("2", "ether"),
+    });
+    reloadEffect();
+  };
   const withdrawFund = async () => {};
 
   useEffect(() => {
