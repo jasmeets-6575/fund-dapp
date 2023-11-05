@@ -37,7 +37,15 @@ function App() {
     });
     reloadEffect();
   };
-  const withdrawFund = async () => {};
+
+  const withdrawFund = async () => {
+    const { contract, web3 } = web3Api;
+    const withdrawAmount = web3.utils.toWei("2", "ether");
+    await contract.withdraw(withdrawAmount, {
+      from: account,
+    });
+    reloadEffect();
+  };
 
   useEffect(() => {
     const getAccount = async () => {
